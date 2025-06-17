@@ -2,5 +2,37 @@
 /node_modules
 .dockerignore
 .env
-Dockerfile
+
 fly.toml
+
+# Node modules (don't copy local deps into Docker image)
+node_modules
+
+# Output folders
+dist
+build
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment files (use secrets, not .env files inside images)
+.env
+.env.*
+
+# OS-specific / Editor files
+.DS_Store
+Thumbs.db
+
+# Git files
+.git
+.gitignore
+
+# Docker files (just in case)
+.dockerignore
+Dockerfile
+
+# IDE / Editor folders
+.vscode
+.idea
+
