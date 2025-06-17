@@ -15,18 +15,9 @@ const { PORT } = process.env;
 const app = express();
 app.use(express.json());
 app.use((req, res, next) => {
-    logger.info({
-        method: req.method,
-        url: req.url,
-        body: req.body,
-        headers: req.headers,
-        user: req.headers['x-user'] || 'anonymous',
-        origin: req.headers.origin || 'unknown',
-        ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown',
-        requestId: req.headers['x-request-id'] || 'no-request-id',
-        timestamp: new Date().toISOString(),
-    })
-
+    logger.info(`${req.method} ${req.url}, ${req.body}`);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     next()
 })
 const server = http.createServer(app);

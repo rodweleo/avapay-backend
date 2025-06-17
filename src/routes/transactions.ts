@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import { Router, Request, Response } from "express";
 import avalancheProvider from "../utils/avalanche/provider";
 import { getAVAXtoKESRate } from "../utils/avalanche/getExchangeRate";
+import MpesaService from "../services/MpesaService";
 
 const TransactionsRouter = Router();
 
@@ -23,8 +24,21 @@ TransactionsRouter.post("/buy-avax", async (req: Request, res: Response): Promis
     try {
         // Calculate AVAX equivalent
         const rateKESPerAVAX = await getAVAXtoKESRate();
-        const avaxAmount = parseFloat((amountKES / rateKESPerAVAX).toFixed(6));
+
+        //calculate the platform fee
+        const platformFeePercentage = 0.04
+        const platformFee = amountKES * platformFeePercentage
+        const netAmountKES = amountKES - platformFee
+
+        const avaxAmount = parseFloat((netAmountKES / rateKESPerAVAX).toFixed(6));
         const amountInWei = ethers.parseEther(avaxAmount.toString());
+
+        //prompt user through mpesa
+        const mpesaService = MpesaService.getInstance();
+
+        const response = await mpesaService.stkPush(netAmountKES, phone)
+
+        console.log(response)
 
         // Send transaction from system wallet
         const tx = await systemWallet.sendTransaction({
@@ -38,6 +52,12 @@ TransactionsRouter.post("/buy-avax", async (req: Request, res: Response): Promis
             message: `Sent ${avaxAmount} AVAX to ${walletAddress} for ${phone}`,
             txHash: tx.hash,
             avaxAmount,
+            netAmountKES,
+            rateKESPerAVAX,
+            feePercent: platformFeePercentage * 100,
+            feeAmountKES: platformFee,
+            walletAddress,
+            phone,
             explorer: `https://testnet.snowtrace.io/tx/${tx.hash}`,
         });
     } catch (e: any) {
