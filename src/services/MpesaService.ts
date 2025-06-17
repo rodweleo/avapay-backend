@@ -1,6 +1,7 @@
 
 import axios from "axios";
 import * as dotenv from "dotenv";
+import { MpesaStkPushResponse } from "../utils/types/mpesa.types";
 dotenv.config();
 
 class MpesaService {
@@ -43,8 +44,8 @@ class MpesaService {
         phoneNumber: string,
         accountReference: string = "Avapay",
         transactionDesc: string = "Buying AVAX with M-Pesa"
-    ): Promise<any> {
-        const token = this.accessToken ?? (await this.generateAccessToken());
+    ): Promise<MpesaStkPushResponse> {
+        const token = await this.generateAccessToken();
 
         const timestamp = new Date()
             .toISOString()
@@ -83,7 +84,7 @@ class MpesaService {
             return response.data;
         } catch (error: any) {
             console.error("STK Push failed:", error?.response?.data || error.message);
-            throw new Error("STK Push failed");
+            throw new Error(`STK Push failed: ${error?.response?.data.errorMessage}`,);
         }
     }
 

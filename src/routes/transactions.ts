@@ -4,6 +4,7 @@ import { Router, Request, Response } from "express";
 import avalancheProvider from "../utils/avalanche/provider";
 import { getAVAXtoKESRate } from "../utils/avalanche/getExchangeRate";
 import MpesaService from "../services/MpesaService";
+import { logger } from "../utils/logger";
 
 const TransactionsRouter = Router();
 
@@ -28,25 +29,30 @@ TransactionsRouter.post("/buy-avax", async (req: Request, res: Response): Promis
         //calculate the platform fee
         const platformFeePercentage = 0.04
         const platformFee = amountKES * platformFeePercentage
-        const netAmountKES = amountKES - platformFee
+        const netAmountKES = Math.floor(amountKES - platformFee)
 
         const avaxAmount = parseFloat((netAmountKES / rateKESPerAVAX).toFixed(6));
         const amountInWei = ethers.parseEther(avaxAmount.toString());
 
+        if (avaxAmount === 0) {
+            return res.status(400).json({ error: "Amount is too low to buy AVAX" });
+        }
+
         //prompt user through mpesa
         const mpesaService = MpesaService.getInstance();
 
-        const response = await mpesaService.stkPush(netAmountKES, phone)
+        await mpesaService.stkPush(amountKES, phone)
 
-        console.log(response)
+        logger.info(`M-Pesa STK push initiated for ${phone} to buy ${avaxAmount} AVAX`);
 
         // Send transaction from system wallet
         const tx = await systemWallet.sendTransaction({
             to: walletAddress,
             value: amountInWei,
         });
+        await tx.wait();
 
-        console.log(`Sent ${avaxAmount} AVAX to ${walletAddress} for ${phone}`);
+        logger.info(`Sent ${avaxAmount} AVAX to ${walletAddress} for ${phone}`);
         res.json({
             success: true,
             message: `Sent ${avaxAmount} AVAX to ${walletAddress} for ${phone}`,
