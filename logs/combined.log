@@ -1,0 +1,15 @@
+{"level":"info","message":{"body":{"amountKES":1,"phone":"+254795565344","walletAddress":"0x6b543eF28F6D5E9f2da0e3dB73717722B2eAd32c"},"headers":{"accept":"*/*","accept-encoding":"gzip, deflate, br","cache-control":"no-cache","connection":"keep-alive","content-length":"117","content-type":"application/json","host":"127.0.0.1:3000","postman-token":"71083b58-4e27-4cd2-b3bf-c713505c44ad","user-agent":"PostmanRuntime/7.39.1"},"ip":"::ffff:127.0.0.1","method":"POST","origin":"unknown","requestId":"no-request-id","timestamp":"2025-06-17T11:34:28.188Z","url":"/transactions/buy-avax","user":"anonymous"},"timestamp":"2025-06-17T11:34:28.308Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T11:39:34.850Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T11:40:33.644Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T11:41:31.861Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T11:44:40.423Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T11:44:52.913Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T11:47:08.066Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T11:48:04.611Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T11:48:23.900Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T11:49:17.641Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T11:57:55.618Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T11:58:03.853Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T12:01:12.481Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T12:07:14.672Z"}
+{"level":"info","message":"POST /transactions/buy-avax, [object Object]","timestamp":"2025-06-17T12:15:06.191Z"}
