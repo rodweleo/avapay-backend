@@ -9,7 +9,7 @@ import { logger } from "./utils/logger";
 
 dotenv.config();
 
-const { PORT } = process.env;
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 app.use(express.json());
@@ -49,4 +49,4 @@ app.use("/transactions", TransactionsRouter);
 
 server.listen(PORT, () => {
     console.log('Server is running on port', PORT);
-});
+})
