@@ -7,7 +7,8 @@ import MpesaService from "../services/MpesaService";
 import { logger } from "../utils/logger";
 import { io } from "../app";
 import axios from "axios"
-
+import dotenv from "dotenv";
+dotenv.config()
 
 //we need a mock database
 const users = [
@@ -92,7 +93,7 @@ TransactionsRouter.post("/mpesa/payment/stkCallbackURL", async (req, res) => {
                 logger.info(`Found socket for user ${phoneNumber} with ID ${id}`);
                 logger.info(`Sending avax to user ${phoneNumber} or socket id ${socket.id}...`);
 
-                await axios.post(`https://avapay-backend.vercel.app/transactions/sendAvax`, {
+                await axios.post(`${process.env.PRODUCTION_BACKEND_URL!}/transactions/sendAvax`, {
                     phoneNumber,
                     amount,
                     socketId: socket.id
