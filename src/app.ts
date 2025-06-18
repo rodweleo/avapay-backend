@@ -23,7 +23,7 @@ app.use((req, res, next) => {
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:8080", "https://avapay.vercel.ap"],
+        origin: ["http://localhost:8080", "https://uat-avapay.vercel.app"],
         methods: ["GET", "POST", "OPTIONS"],
     },
 });
