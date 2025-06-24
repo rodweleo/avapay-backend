@@ -1,13 +1,13 @@
 
-import { ethers } from "ethers";
+import { ethers, TransactionReceipt, TransactionResponse } from "ethers";
 import { Router, Request, Response } from "express";
-import avalancheProvider from "../utils/avalanche/provider";
 import { getAVAXtoKESRate } from "../utils/avalanche/getExchangeRate";
 import MpesaService from "../services/MpesaService";
 import { logger } from "../utils/logger";
 import { io } from "../app";
 import axios from "axios"
 import dotenv from "dotenv";
+import TokenService from "../services/TokenService";
 dotenv.config()
 
 //we need a mock database
@@ -20,7 +20,6 @@ const users = [
 
 const TransactionsRouter = Router();
 
-const systemWallet = new ethers.Wallet(process.env.APP_WALLET_PRIVATE_KEY!, avalancheProvider);
 
 TransactionsRouter.post("/buy-avax", async (req: Request, res: Response): Promise<any> => {
 
@@ -42,8 +41,8 @@ TransactionsRouter.post("/buy-avax", async (req: Request, res: Response): Promis
         const platformFeePercentage = 0.04
         const platformFee = amountKES * platformFeePercentage
         const netAmountKES = Math.floor(amountKES - platformFee)
-
         const avaxAmount = parseFloat((netAmountKES / rateKESPerAVAX).toFixed(6));
+        const amountInWei = ethers.parseEther(avaxAmount.toString());
 
         // if (avaxAmount === 0) {
         //     return res.status(400).json({ error: "Amount is too low to buy AVAX" });
@@ -51,14 +50,32 @@ TransactionsRouter.post("/buy-avax", async (req: Request, res: Response): Promis
 
         //prompt user through mpesa
         const mpesaService = MpesaService.getInstance();
-
         const response = await mpesaService.stkPush(amountKES, phone)
 
         logger.info(`M-Pesa STK push initiated for ${phone} to buy ${avaxAmount} AVAX`);
 
+        //now send the avax to the account
+        const tokenService = new TokenService();
+        const tx: TransactionResponse | null = await tokenService.sendAvax({
+            to: walletAddress as `0x${string}`,
+            amount: amountInWei
+        })
+        let txReceipt: TransactionReceipt | null | undefined = await tx?.wait()
+
         res.json({
             success: true,
-            ...response
+            ...response,
+            txReceipt,
+            metadata: {
+                avaxAmount,
+                netAmountKES,
+                rateKESPerAVAX,
+                feePercent: platformFeePercentage * 100,
+                feeAmountKES: platformFee,
+                walletAddress,
+                phone,
+                explorer: `https://testnet.snowtrace.io/tx/${txReceipt?.hash}`,
+            }
         })
     } catch (e: any) {
         console.error("Error buying AVAX using M-Pesa", e.message);
@@ -151,11 +168,11 @@ TransactionsRouter.post("/sendAvax", async (req: Request, res: Response): Promis
         const amountInWei = ethers.parseEther(avaxAmount.toString());
 
         // Send transaction from system wallet
-        const tx = await systemWallet.sendTransaction({
-            to: walletAddress,
-            value: amountInWei,
-        });
-        await tx.wait();
+        const tokenService = new TokenService()
+        const txReceipt = await tokenService.sendAvax({
+            to: walletAddress as `0x${string}`,
+            amount: amountInWei
+        })
 
         logger.info(`Sent ${avaxAmount} AVAX to ${walletAddress}`);
 
@@ -164,7 +181,7 @@ TransactionsRouter.post("/sendAvax", async (req: Request, res: Response): Promis
             if (socket) {
                 socket.emit("payment-success", {
                     message: `Sent ${avaxAmount} AVAX to ${walletAddress} for ${phoneNumber}`,
-                    txHash: tx.hash,
+                    txHash: txReceipt?.hash,
                     avaxAmount,
                     netAmountKES,
                     rateKESPerAVAX,
@@ -172,7 +189,7 @@ TransactionsRouter.post("/sendAvax", async (req: Request, res: Response): Promis
                     feeAmountKES: platformFee,
                     walletAddress,
                     phoneNumber,
-                    explorer: `https://testnet.snowtrace.io/tx/${tx.hash}`,
+                    explorer: `https://testnet.snowtrace.io/tx/${txReceipt?.hash}`,
                 });
             } else {
                 logger.warn(`Socket with ID ${req.body.socketId} not found`);
@@ -182,7 +199,7 @@ TransactionsRouter.post("/sendAvax", async (req: Request, res: Response): Promis
         const successPayload = {
             success: true,
             message: `Sent ${avaxAmount} AVAX to ${walletAddress} for ${phoneNumber}`,
-            txHash: tx.hash,
+            txHash: txReceipt?.hash,
             avaxAmount,
             netAmountKES,
             rateKESPerAVAX,
@@ -190,7 +207,7 @@ TransactionsRouter.post("/sendAvax", async (req: Request, res: Response): Promis
             feeAmountKES: platformFee,
             walletAddress,
             phoneNumber,
-            explorer: `https://testnet.snowtrace.io/tx/${tx.hash}`,
+            explorer: `https://testnet.snowtrace.io/tx/${txReceipt?.hash}`,
         }
         res.json(successPayload);
     } catch (e: any) {

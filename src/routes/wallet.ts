@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
 import { isAddress, formatEther } from "ethers";
 import avalancheProvider from "../utils/avalanche/provider";
+import { getWalletBalance } from "../functions/wallet/getWalletBalance";
 
 
 const WalletRouter = Router();
@@ -13,14 +14,9 @@ WalletRouter.get("/balance", async (req: Request, res: Response): Promise<any> =
     }
 
     try {
-        const balance = await avalancheProvider.getBalance(address);
-        const formatted = formatEther(balance);
+        const balance = await getWalletBalance(address as `0x${string}`)
 
-        res.json({
-            address,
-            balance: formatted,
-            unit: "AVAX"
-        });
+        res.json(balance);
     } catch (err: any) {
         res.status(500).json({ error: "Failed to fetch balance", detail: err.message });
     }
