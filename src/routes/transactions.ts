@@ -60,8 +60,9 @@ TransactionsRouter.post("/buy-avax", async (req: Request, res: Response): Promis
             to: walletAddress as `0x${string}`,
             amount: amountInWei
         })
+        // console.log('Transaction: ', tx)
         let txReceipt: TransactionReceipt | null | undefined = await tx?.wait()
-
+        // console.log('Transaction receipt: ', txReceipt)
         res.json({
             success: true,
             ...response,
@@ -74,7 +75,7 @@ TransactionsRouter.post("/buy-avax", async (req: Request, res: Response): Promis
                 feeAmountKES: platformFee,
                 walletAddress,
                 phone,
-                explorer: `https://testnet.snowtrace.io/tx/${txReceipt?.hash}`,
+                explorer: `https://testnet.snowtrace.io/tx/${tx?.hash}`,
             }
         })
     } catch (e: any) {
